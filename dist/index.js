@@ -690,6 +690,7 @@ function getExecutable(inputs) {
     }
     return executable;
 }
+// TODO: Add runRetryAction and on_retry_action
 function runRetryCmd(inputs) {
     return __awaiter(this, void 0, void 0, function () {
         var error_1;
@@ -716,6 +717,18 @@ function runRetryCmd(inputs) {
         });
     });
 }
+function runAction(attempt, inputs) {
+    return __awaiter(this, void 0, void 0, function () {
+        return __generator(this, function (_a) {
+            // No action provided, nothing to run here
+            if (!inputs.action)
+                return [2 /*return*/];
+            // TODO: run action or something
+            console.log('Running CUSTOM action!');
+            return [2 /*return*/];
+        });
+    });
+}
 function runCmd(attempt, inputs) {
     var _a, _b;
     return __awaiter(this, void 0, void 0, function () {
@@ -723,6 +736,9 @@ function runCmd(attempt, inputs) {
         return __generator(this, function (_c) {
             switch (_c.label) {
                 case 0:
+                    // Nothing to run, stop hereZ
+                    if (!inputs.command)
+                        return [2 /*return*/];
                     end_time = Date.now() + (0, inputs_1.getTimeout)(inputs);
                     executable = getExecutable(inputs);
                     exit = 0;
@@ -775,7 +791,7 @@ function runCmd(attempt, inputs) {
         });
     });
 }
-function runAction(inputs) {
+function runRetryAction(inputs) {
     return __awaiter(this, void 0, void 0, function () {
         var attempt, error_2;
         return __generator(this, function (_a) {
@@ -786,34 +802,40 @@ function runAction(inputs) {
                     attempt = 1;
                     _a.label = 2;
                 case 2:
-                    if (!(attempt <= inputs.max_attempts)) return [3 /*break*/, 13];
+                    if (!(attempt <= inputs.max_attempts)) return [3 /*break*/, 14];
                     _a.label = 3;
                 case 3:
-                    _a.trys.push([3, 5, , 12]);
+                    _a.trys.push([3, 6, , 13]);
                     // just keep overwriting attempts output
                     (0, core_1.setOutput)(OUTPUT_TOTAL_ATTEMPTS_KEY, attempt);
-                    return [4 /*yield*/, runCmd(attempt, inputs)];
+                    return [4 /*yield*/, runAction(attempt, inputs)];
                 case 4:
                     _a.sent();
-                    (0, core_1.info)("Command completed after ".concat(attempt, " attempt(s)."));
-                    return [3 /*break*/, 13];
+                    return [4 /*yield*/, runCmd(attempt, inputs)];
                 case 5:
-                    error_2 = _a.sent();
-                    if (!(attempt === inputs.max_attempts)) return [3 /*break*/, 6];
-                    throw new Error("Final attempt failed. ".concat(error_2.message));
+                    _a.sent();
+                    (0, core_1.info)("Command completed after ".concat(attempt, " attempt(s)."));
+                    return [3 /*break*/, 14];
                 case 6:
-                    if (!(!done && inputs.retry_on === 'error')) return [3 /*break*/, 7];
+                    error_2 = _a.sent();
+                    if (!(attempt === inputs.max_attempts)) return [3 /*break*/, 7];
+                    throw new Error("Final attempt failed. ".concat(error_2.message));
+                case 7:
+                    if (!(!done && inputs.retry_on === 'error')) return [3 /*break*/, 8];
                     // error: timeout
                     throw error_2;
-                case 7:
-                    if (!(inputs.retry_on_exit_code && inputs.retry_on_exit_code !== exit)) return [3 /*break*/, 8];
-                    throw error_2;
                 case 8:
-                    if (!(exit > 0 && inputs.retry_on === 'timeout')) return [3 /*break*/, 9];
+                    if (!(inputs.retry_on_exit_code && inputs.retry_on_exit_code !== exit)) return [3 /*break*/, 9];
+                    throw error_2;
+                case 9:
+                    if (!(exit > 0 && inputs.retry_on === 'timeout')) return [3 /*break*/, 10];
                     // error: error
                     throw error_2;
-                case 9: return [4 /*yield*/, runRetryCmd(inputs)];
-                case 10:
+                case 10: 
+                // TODO: run runRetryAction here
+                return [4 /*yield*/, runRetryCmd(inputs)];
+                case 11:
+                    // TODO: run runRetryAction here
                     _a.sent();
                     if (inputs.warning_on_retry) {
                         (0, core_1.warning)("Attempt ".concat(attempt, " failed. Reason: ").concat(error_2.message));
@@ -821,18 +843,18 @@ function runAction(inputs) {
                     else {
                         (0, core_1.info)("Attempt ".concat(attempt, " failed. Reason: ").concat(error_2.message));
                     }
-                    _a.label = 11;
-                case 11: return [3 /*break*/, 12];
-                case 12:
+                    _a.label = 12;
+                case 12: return [3 /*break*/, 13];
+                case 13:
                     attempt++;
                     return [3 /*break*/, 2];
-                case 13: return [2 /*return*/];
+                case 14: return [2 /*return*/];
             }
         });
     });
 }
 var inputs = (0, inputs_1.getInputs)();
-runAction(inputs)
+runRetryAction(inputs)
     .then(function () {
     (0, core_1.setOutput)(OUTPUT_EXIT_CODE_KEY, 0);
     process.exit(0); // success
@@ -2492,7 +2514,8 @@ function getInputs() {
     var timeout_minutes = getInputNumber('timeout_minutes', false);
     var timeout_seconds = getInputNumber('timeout_seconds', false);
     var max_attempts = getInputNumber('max_attempts', true) || 3;
-    var command = (0, core_1.getInput)('command', { required: true });
+    var action = (0, core_1.getInput)('action', { required: !(0, core_1.getInput)('command') });
+    var command = (0, core_1.getInput)('command', { required: !(0, core_1.getInput)('action') });
     var retry_wait_seconds = getInputNumber('retry_wait_seconds', false) || 10;
     var shell = (0, core_1.getInput)('shell');
     var polling_interval_seconds = getInputNumber('polling_interval_seconds', false) || 1;
@@ -2506,6 +2529,7 @@ function getInputs() {
         timeout_minutes: timeout_minutes,
         timeout_seconds: timeout_seconds,
         max_attempts: max_attempts,
+        action: action,
         command: command,
         retry_wait_seconds: retry_wait_seconds,
         shell: shell,

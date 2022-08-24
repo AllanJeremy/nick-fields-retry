@@ -51,6 +51,7 @@ function getExecutable(inputs: Inputs): string {
   return executable;
 }
 
+// TODO: Add runRetryAction and on_retry_action
 async function runRetryCmd(inputs: Inputs): Promise<void> {
   // if no retry script, just continue
   if (!inputs.on_retry_command) {
@@ -65,7 +66,18 @@ async function runRetryCmd(inputs: Inputs): Promise<void> {
   }
 }
 
+async function runAction(attempt: number, inputs: Inputs) {
+  // No action provided, nothing to run here
+  if (!inputs.action) return;
+
+  // TODO: run action or something
+  console.log('Running CUSTOM action!');
+}
+
 async function runCmd(attempt: number, inputs: Inputs) {
+  // Nothing to run, stop hereZ
+  if (!inputs.command) return;
+
   const end_time = Date.now() + getTimeout(inputs);
   const executable = getExecutable(inputs);
 
@@ -114,13 +126,15 @@ async function runCmd(attempt: number, inputs: Inputs) {
   }
 }
 
-async function runAction(inputs: Inputs) {
+async function runRetryAction(inputs: Inputs) {
   await validateInputs(inputs);
 
   for (let attempt = 1; attempt <= inputs.max_attempts; attempt++) {
     try {
       // just keep overwriting attempts output
       setOutput(OUTPUT_TOTAL_ATTEMPTS_KEY, attempt);
+
+      await runAction(attempt, inputs);
       await runCmd(attempt, inputs);
       info(`Command completed after ${attempt} attempt(s).`);
       break;
@@ -137,6 +151,7 @@ async function runAction(inputs: Inputs) {
         // error: error
         throw error;
       } else {
+        // TODO: run runRetryAction here
         await runRetryCmd(inputs);
         if (inputs.warning_on_retry) {
           warning(`Attempt ${attempt} failed. Reason: ${error.message}`);
@@ -150,7 +165,7 @@ async function runAction(inputs: Inputs) {
 
 const inputs = getInputs();
 
-runAction(inputs)
+runRetryAction(inputs)
   .then(() => {
     setOutput(OUTPUT_EXIT_CODE_KEY, 0);
     process.exit(0); // success

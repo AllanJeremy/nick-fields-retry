@@ -5,7 +5,8 @@ export interface Inputs {
   timeout_minutes: number | undefined;
   timeout_seconds: number | undefined;
   max_attempts: number;
-  command: string;
+  action: string | undefined;
+  command: string | undefined;
   retry_wait_seconds: number;
   shell: string | undefined;
   polling_interval_seconds: number;
@@ -65,7 +66,8 @@ export function getInputs(): Inputs {
   const timeout_minutes = getInputNumber('timeout_minutes', false);
   const timeout_seconds = getInputNumber('timeout_seconds', false);
   const max_attempts = getInputNumber('max_attempts', true) || 3;
-  const command = getInput('command', { required: true });
+  const action = getInput('action', { required: !getInput('command') });
+  const command = getInput('command', { required: !getInput('action') });
   const retry_wait_seconds = getInputNumber('retry_wait_seconds', false) || 10;
   const shell = getInput('shell');
   const polling_interval_seconds = getInputNumber('polling_interval_seconds', false) || 1;
@@ -80,6 +82,7 @@ export function getInputs(): Inputs {
     timeout_minutes,
     timeout_seconds,
     max_attempts,
+    action,
     command,
     retry_wait_seconds,
     shell,
