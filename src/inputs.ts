@@ -1,11 +1,11 @@
-import { getInput } from '@actions/core';
+import { getInput, getMultilineInput } from '@actions/core';
 import ms from 'milliseconds';
 
 export interface Inputs {
   timeout_minutes: number | undefined;
   timeout_seconds: number | undefined;
   max_attempts: number;
-  action: string | undefined;
+  action?: string[];
   command: string | undefined;
   retry_wait_seconds: number;
   shell: string | undefined;
@@ -66,8 +66,12 @@ export function getInputs(): Inputs {
   const timeout_minutes = getInputNumber('timeout_minutes', false);
   const timeout_seconds = getInputNumber('timeout_seconds', false);
   const max_attempts = getInputNumber('max_attempts', true) || 3;
-  const action = getInput('action', { required: !getInput('command') });
-  const command = getInput('command', { required: !getInput('action') });
+  const action = getMultilineInput('action', {
+    required: !getInput('command'),
+  });
+  const command = getInput('command', {
+    required: !getMultilineInput('action'),
+  });
   const retry_wait_seconds = getInputNumber('retry_wait_seconds', false) || 10;
   const shell = getInput('shell');
   const polling_interval_seconds = getInputNumber('polling_interval_seconds', false) || 1;

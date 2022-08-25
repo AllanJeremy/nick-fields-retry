@@ -724,7 +724,7 @@ function runAction(attempt, inputs) {
             if (!inputs.action)
                 return [2 /*return*/];
             // TODO: run action or something
-            console.log('Running CUSTOM action!');
+            console.log('Running CUSTOM action! Action input value: ', inputs.action);
             return [2 /*return*/];
         });
     });
@@ -2514,8 +2514,12 @@ function getInputs() {
     var timeout_minutes = getInputNumber('timeout_minutes', false);
     var timeout_seconds = getInputNumber('timeout_seconds', false);
     var max_attempts = getInputNumber('max_attempts', true) || 3;
-    var action = (0, core_1.getInput)('action', { required: !(0, core_1.getInput)('command') });
-    var command = (0, core_1.getInput)('command', { required: !(0, core_1.getInput)('action') });
+    var action = (0, core_1.getMultilineInput)('action', {
+        required: !(0, core_1.getInput)('command'),
+    });
+    var command = (0, core_1.getInput)('command', {
+        required: !(0, core_1.getMultilineInput)('action'),
+    });
     var retry_wait_seconds = getInputNumber('retry_wait_seconds', false) || 10;
     var shell = (0, core_1.getInput)('shell');
     var polling_interval_seconds = getInputNumber('polling_interval_seconds', false) || 1;
