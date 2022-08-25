@@ -66,13 +66,27 @@ async function runRetryCmd(inputs: Inputs): Promise<void> {
   }
 }
 
+function parseActionOptions({ with: actionOptions }: Inputs): Record<string, string>[] {
+  if (!actionOptions) return [];
+
+  return actionOptions.map((option) => {
+    const split = option.split(':');
+    const key = split[0].trim();
+    const value = split[1].trim();
+
+    return {
+      [key]: value,
+    };
+  });
+}
+
 async function runAction(attempt: number, inputs: Inputs) {
   // No action provided, nothing to run here
   if (!inputs.action) return;
 
   // TODO: run action or something
   console.log('Running CUSTOM action! Action input value: ', inputs.action);
-  console.log('Action inputs: ', inputs.with);
+  console.log('Action inputs: ', parseActionOptions(inputs));
 }
 
 async function runCmd(attempt: number, inputs: Inputs) {

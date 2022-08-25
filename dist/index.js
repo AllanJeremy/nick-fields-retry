@@ -717,6 +717,20 @@ function runRetryCmd(inputs) {
         });
     });
 }
+function parseActionOptions(_a) {
+    var actionOptions = _a.with;
+    if (!actionOptions)
+        return [];
+    return actionOptions.map(function (option) {
+        var _a;
+        var split = option.split(':');
+        var key = split[0].trim();
+        var value = split[1].trim();
+        return _a = {},
+            _a[key] = value,
+            _a;
+    });
+}
 function runAction(attempt, inputs) {
     return __awaiter(this, void 0, void 0, function () {
         return __generator(this, function (_a) {
@@ -725,7 +739,7 @@ function runAction(attempt, inputs) {
                 return [2 /*return*/];
             // TODO: run action or something
             console.log('Running CUSTOM action! Action input value: ', inputs.action);
-            console.log('Action inputs: ', inputs.with);
+            console.log('Action inputs: ', parseActionOptions(inputs));
             return [2 /*return*/];
         });
     });
