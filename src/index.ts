@@ -72,6 +72,7 @@ async function runAction(attempt: number, inputs: Inputs) {
 
   // TODO: run action or something
   console.log('Running CUSTOM action! Action input value: ', inputs.action);
+  console.log('Action inputs: ', inputs.with);
 }
 
 async function runCmd(attempt: number, inputs: Inputs) {

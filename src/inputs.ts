@@ -5,7 +5,8 @@ export interface Inputs {
   timeout_minutes: number | undefined;
   timeout_seconds: number | undefined;
   max_attempts: number;
-  action?: string[];
+  action?: string;
+  with?: string[];
   command: string | undefined;
   retry_wait_seconds: number;
   shell: string | undefined;
@@ -66,11 +67,14 @@ export function getInputs(): Inputs {
   const timeout_minutes = getInputNumber('timeout_minutes', false);
   const timeout_seconds = getInputNumber('timeout_seconds', false);
   const max_attempts = getInputNumber('max_attempts', true) || 3;
-  const action = getMultilineInput('action', {
+  const action = getInput('action', {
     required: !getInput('command'),
   });
+  const actionOptions = getMultilineInput('with', {
+    required: Boolean(action),
+  });
   const command = getInput('command', {
-    required: !getMultilineInput('action'),
+    required: !getInput('action'),
   });
   const retry_wait_seconds = getInputNumber('retry_wait_seconds', false) || 10;
   const shell = getInput('shell');
@@ -87,6 +91,7 @@ export function getInputs(): Inputs {
     timeout_seconds,
     max_attempts,
     action,
+    with: actionOptions,
     command,
     retry_wait_seconds,
     shell,

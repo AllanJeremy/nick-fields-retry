@@ -725,6 +725,7 @@ function runAction(attempt, inputs) {
                 return [2 /*return*/];
             // TODO: run action or something
             console.log('Running CUSTOM action! Action input value: ', inputs.action);
+            console.log('Action inputs: ', inputs.with);
             return [2 /*return*/];
         });
     });
@@ -2514,11 +2515,14 @@ function getInputs() {
     var timeout_minutes = getInputNumber('timeout_minutes', false);
     var timeout_seconds = getInputNumber('timeout_seconds', false);
     var max_attempts = getInputNumber('max_attempts', true) || 3;
-    var action = (0, core_1.getMultilineInput)('action', {
+    var action = (0, core_1.getInput)('action', {
         required: !(0, core_1.getInput)('command'),
     });
+    var actionOptions = (0, core_1.getMultilineInput)('with', {
+        required: Boolean(action),
+    });
     var command = (0, core_1.getInput)('command', {
-        required: !(0, core_1.getMultilineInput)('action'),
+        required: !(0, core_1.getInput)('action'),
     });
     var retry_wait_seconds = getInputNumber('retry_wait_seconds', false) || 10;
     var shell = (0, core_1.getInput)('shell');
@@ -2534,6 +2538,7 @@ function getInputs() {
         timeout_seconds: timeout_seconds,
         max_attempts: max_attempts,
         action: action,
+        with: actionOptions,
         command: command,
         retry_wait_seconds: retry_wait_seconds,
         shell: shell,
